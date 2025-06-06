@@ -36,7 +36,8 @@ type cliCommand struct {
 	description string
 	callback    func(*Config, *pokecache.Cache, []string) error
 }
-var pokedex = make(map[])
+
+var pokedex = make(map[string]Pokemon)
 
 var commandRegistery map[string]cliCommand
 
@@ -197,15 +198,13 @@ func commandCatch(config *Config, cache *pokecache.Cache, args []string) error {
 		return err
 	}
 
-	cache.Add(url,data)
+	cache.Add(url, data)
 
 	var pokemon Pokemon
 	err = json.Unmarshal(data, &pokemon)
 	if err != nil {
 		return err
 	}
-
-	
 
 	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
 
@@ -221,6 +220,7 @@ func commandCatch(config *Config, cache *pokecache.Cache, args []string) error {
 	}
 
 	fmt.Printf("%s was caught!\n", pokemon.Name)
+	pokedex[pokemon.Name] = pokemon
 	return nil
 }
 
