@@ -73,6 +73,16 @@ func initializeCommands() {
 			description: "Displays possible pokemons at specific Location ",
 			callback:    commandCatch,
 		},
+		"inspect": {
+			name:        "inspect <pokemon>",
+			description: "Displays if pokemon is in pokedex ",
+			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex ",
+			description: "Displays caught pokemons in pokedex ",
+			callback:    commandPokedex,
+		},
 	}
 }
 
@@ -255,6 +265,35 @@ func commandExplore(config *Config, cache *pokecache.Cache, args []string) error
 	return printPokemonFromData(data)
 }
 
+func commandInspect(config *Config, cache *pokecache.Cache, args []string) error {
+	if len(args) == 0 {
+		return errors.New("please provide a pokemon area to inspect")
+	}
+	pokemon_str := args[0]
+	pokemon, exists := pokedex[pokemon_str]
+	if exists {
+		//fmt.Printf("found %s in pokedex\n", pokemon_str)
+		printDetailedPokemonFromData(pokemon)
+		return nil
+	} else {
+		fmt.Println("Pokemon hasn't been caught")
+		return nil
+	}
+
+	return nil
+}
+func commandPokedex(config *Config, cache *pokecache.Cache, args []string) error {
+	if len(pokedex) < 1 {
+		fmt.Println("Pokedex empty")
+		return nil
+	}
+	for pokemon := range pokedex {
+		fmt.Printf("- %v\n", pokemon)
+	}
+
+	return nil
+}
+
 func fetchLocations(url string, cache *pokecache.Cache) (LocationAreas, error) {
 	if url == "" {
 		return LocationAreas{}, errors.New("no more locations in this direction")
@@ -309,5 +348,21 @@ func printPokemonFromData(data []byte) error {
 	for _, p := range exploreData.PokemonEncounters {
 		fmt.Printf("%s\n", p.Pokemon.Name)
 	}
+	return nil
+}
+
+func printDetailedPokemonFromData(pokemon Pokemon) error {
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Height: %v\n", pokemon.Height)
+	fmt.Printf("Height: %v\n", pokemon.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("-%v : %v\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, t := range pokemon.Types {
+		fmt.Printf("- %v\n", t.Type.Name)
+	}
+
 	return nil
 }
